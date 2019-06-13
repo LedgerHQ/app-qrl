@@ -19,49 +19,84 @@
 ifeq ($(BOLOS_SDK),)
 $(error BOLOS_SDK is not set)
 endif
-
-dummy_submodules := $(shell git submodule update --init --recursive)
-
-SCRIPT_LD:=$(CURDIR)/script.ld
-
 include $(BOLOS_SDK)/Makefile.defines
 
 # Main app configuration
 APPNAME = "QRL"
-APPVERSION_M=0
-APPVERSION_N=9
-APPVERSION_P=3
+APPVERSION_M=1
+APPVERSION_N=1
+APPVERSION_P=2
 
+ifeq ($(TARGET_NAME),TARGET_NANOS)
 APP_LOAD_PARAMS = --appFlags 0x00 --delete $(COMMON_LOAD_PARAMS) --path "44'/238'"
-ICONNAME=$(CURDIR)/icon.gif
+endif
+
+ifeq ($(TARGET_NAME),TARGET_NANOX)
+APP_LOAD_PARAMS = --appFlags 0x200 --delete $(COMMON_LOAD_PARAMS) --path "44'/238'"
+endif
+
+ifeq ($(TARGET_NAME),TARGET_NANOS)
+SCRIPT_LD:=$(CURDIR)/script.ld
+ICONNAME:=$(CURDIR)/nanos_icon.gif
+endif
+
+ifeq ($(TARGET_NAME),TARGET_NANOX)
+SCRIPT_LD:=$(CURDIR)/script2.ld
+ICONNAME:=$(CURDIR)/nanox_icon.gif
+endif
+
+ifndef ICONNAME
+$(error ICONNAME is not set)
+endif
+
+all: default
 
 ############
 # Platform
 
 DEFINES   += UNUSED\(x\)=\(void\)x
+DEFINES   += PRINTF\(...\)=
 
 APPVERSION=$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)
 DEFINES   += APPVERSION=\"$(APPVERSION)\"
 
-DEFINES += OS_IO_SEPROXYHAL IO_SEPROXYHAL_BUFFER_SIZE_B=128
-DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=7 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
-
+DEFINES += OS_IO_SEPROXYHAL
 DEFINES += HAVE_BAGL HAVE_SPRINTF
-DEFINES += PRINTF\(...\)=
 DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=7 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
 
 DEFINES += LEDGER_MAJOR_VERSION=$(APPVERSION_M) LEDGER_MINOR_VERSION=$(APPVERSION_N) LEDGER_PATCH_VERSION=$(APPVERSION_P)
 
-SDK_SOURCE_PATH += lib_u2f
-DEFINES   += HAVE_U2F HAVE_IO_U2F
 DEFINES   += USB_SEGMENT_SIZE=64
+WEBUSB_URL = www.ledgerwallet.com
+DEFINES   += HAVE_WEBUSB WEBUSB_URL_SIZE_B=$(shell echo -n $(WEBUSB_URL) | wc -c) WEBUSB_URL=$(shell echo -n $(WEBUSB_URL) | sed -e "s/./\\\'\0\\\',/g")
+DEFINES   += HAVE_BOLOS_APP_STACK_CANARY
+DEFINES   += HAVE_U2F HAVE_IO_U2F
 DEFINES   += U2F_PROXY_MAGIC=\"QRL\"
 DEFINES   += U2F_MAX_MESSAGE_SIZE=264 #257+5+2
 
-DEFINES   += HAVE_BOLOS_APP_STACK_CANARY
-DEFINES   += LEDGER_SPECIFIC
+ifeq ($(TARGET_NAME),TARGET_NANOX)
+DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=300
+
+DEFINES       += HAVE_GLO096
+DEFINES       += HAVE_BAGL BAGL_WIDTH=128 BAGL_HEIGHT=64
+DEFINES       += HAVE_BAGL_ELLIPSIS # long label truncation feature
+DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
+DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
+DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
+
+DEFINES          += HAVE_UX_FLOW
+
+#SDK_SOURCE_PATH  += lib_blewbxx lib_blewbxx_impl
+SDK_SOURCE_PATH  += lib_ux
+else
+# Assume Nano S
+DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=128
+endif
+
+# X specific
 
 #Feature temporarily disabled
+DEFINES   += LEDGER_SPECIFIC
 #DEFINES   += TESTING_ENABLED
 #DEFINES   += TESTING_MOCKSEED
 #DEFINES   += TXTOKEN_ENABLED
@@ -94,35 +129,30 @@ AS := $(GCCPATH)arm-none-eabi-gcc
 AFLAGS +=
 
 LD       := $(GCCPATH)arm-none-eabi-gcc
-LDFLAGS  += -O3 -s
+LDFLAGS  += -O3 -Os
 LDLIBS   += -lm -lgcc -lc
 
 ##########################
+include $(BOLOS_SDK)/Makefile.glyphs
 
 APP_SOURCE_PATH += src src/libxmss src/lib deps/ledger-zxlib/include
 SDK_SOURCE_PATH += lib_stusb lib_u2f lib_stusb_impl
 
-#include $(BOLOS_SDK)/Makefile.glyphs
 
-all: default
-
-load: all
+load:
 	python -m ledgerblue.loadApp $(APP_LOAD_PARAMS)
 
-delete: all
+delete:
 	python -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)
 
-package: all
+package:
 	./pkgdemo.sh ${APPNAME} ${APPVERSION} ${ICONNAME}
 
-
 # Import generic rules from the SDK
-
 include $(BOLOS_SDK)/Makefile.rules
 
 #add dependency on custom makefile filename
-dep/%.d: %.c Makefile.genericwallet
-
+dep/%.d: %.c Makefile
 
 listvariants:
 	@echo VARIANTS COIN qrl

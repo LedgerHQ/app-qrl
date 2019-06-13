@@ -46,10 +46,6 @@ extern app_ctx_t ctx;
 #define INS_TEST_COMM           0x88
 #define INS_TEST_GETSEED        0x89
 
-#define APPMODE_NOT_INITIALIZED    0x00
-#define APPMODE_KEYGEN_RUNNING     0x01
-#define APPMODE_READY              0x02
-
 void handler_init_device(unsigned int unused);
 
 void app_init();

@@ -1,13 +1,12 @@
 // Distributed under the MIT software license, see the accompanying
 // file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #pragma once
-#include <stdint.h>
-#include "zxmacros.h"
-#include "parameters.h"
-#include "shash.h"
-#include "adrs.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <wotsp.h>
 #include "fips202.h"
-#include "wotsp.h"
 
 #pragma pack(push, 1)
 typedef union {
@@ -62,3 +61,7 @@ typedef union {
   };
 } xmss_sig_ctx_t;
 #pragma pack(pop)
+
+#ifdef __cplusplus
+}
+#endif

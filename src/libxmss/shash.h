@@ -2,10 +2,14 @@
 // file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #pragma once
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include "zxmacros.h"
-#include "adrs.h"
 #include "parameters.h"
+#include "adrs.h"
 
 #pragma pack(push, 1)
 typedef union {
@@ -74,7 +78,7 @@ typedef union {
 
 #ifndef LEDGER_SPECIFIC
 #include <stdio.h>
-__INLINE void dump_hex(const char *prefix, uint8_t *data, uint16_t size) {
+__Z_INLINE void dump_hex(const char *prefix, uint8_t *data, uint16_t size) {
     printf("%s %04d ", prefix, size);
     for (int i = 0; i < size; i++) {
         if (i % 32 == 0)
@@ -85,12 +89,12 @@ __INLINE void dump_hex(const char *prefix, uint8_t *data, uint16_t size) {
 }
 #endif
 
-__INLINE void PRF_init(shash_input_t *shash_in, uint8_t type) {
+__Z_INLINE void PRF_init(shash_input_t *shash_in, uint8_t type) {
     memset(shash_in->raw, 0, 96);
     shash_in->type[31] = type;
 }
 
-__INLINE void memxor(uint8_t *in_out, const uint8_t *in, const uint8_t count) {
+__Z_INLINE void memxor(uint8_t *in_out, const uint8_t *in, const uint8_t count) {
     for (size_t i = 0; i < count; i++) {
         *(in_out + i) ^= *(in + i);
     }
@@ -99,7 +103,7 @@ __INLINE void memxor(uint8_t *in_out, const uint8_t *in, const uint8_t count) {
 #ifdef LEDGER_SPECIFIC
 #include "os.h"
 #include "cx.h"
-__INLINE void __sha256(uint8_t *out, const uint8_t* in, uint16_t in_len)
+__Z_INLINE void __sha256(uint8_t *out, const uint8_t* in, uint16_t in_len)
 {
     cx_hash_sha256(in, in_len, out, 32);
 }
@@ -107,25 +111,25 @@ __INLINE void __sha256(uint8_t *out, const uint8_t* in, uint16_t in_len)
 #else
 
 #include <openssl/sha.h>
-__INLINE void __sha256(uint8_t *out, const uint8_t *in, uint16_t in_len) {
+__Z_INLINE void __sha256(uint8_t *out, const uint8_t *in, uint16_t in_len) {
     SHA256(in, in_len, out);
 }
 
 #endif
 
-__INLINE void shash96(uint8_t *out, const shash_input_t *in) {
+__Z_INLINE void shash96(uint8_t *out, const shash_input_t *in) {
     __sha256(out, in->raw, 96);
 }
 
-__INLINE void shash128_shifted(uint8_t *out, const hashh_t *in) {
+__Z_INLINE void shash128_shifted(uint8_t *out, const hashh_t *in) {
     __sha256(out, in->shifted_raw, 128);
 }
 
-__INLINE void shash160(uint8_t *out, const hashh_t *in) {
+__Z_INLINE void shash160(uint8_t *out, const hashh_t *in) {
     __sha256(out, in->raw, 160);
 }
 
-__INLINE void hash_f(uint8_t *in_out, shash_input_t *shash_in) {
+__Z_INLINE void hash_f(uint8_t *in_out, shash_input_t *shash_in) {
     shash_input_t h_in;
     PRF_init(&h_in, SHASH_TYPE_F);
 
@@ -140,7 +144,7 @@ __INLINE void hash_f(uint8_t *in_out, shash_input_t *shash_in) {
     shash96(in_out, &h_in);
 }
 
-__INLINE void shash_h(uint8_t *out, const uint8_t *in, hashh_t *hhash_in) {
+__Z_INLINE void shash_h(uint8_t *out, const uint8_t *in, hashh_t *hhash_in) {
     hhash_in->basic.type[31] = SHASH_TYPE_PRF;
 
     hhash_in->basic.adrs.keyAndMask = HtoNL(1u);
@@ -161,3 +165,7 @@ __INLINE void shash_h(uint8_t *out, const uint8_t *in, hashh_t *hhash_in) {
 
     shash128_shifted(out, hhash_in);
 }
+
+#ifdef  __cplusplus
+}
+#endif

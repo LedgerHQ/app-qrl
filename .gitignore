@@ -12,3 +12,9 @@ obj/
 bin/
 
 debug/
+
+src/glyphs\.c
+
+src/glyphs\.h
+
+script2\.ld
