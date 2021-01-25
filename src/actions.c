@@ -14,6 +14,7 @@
 *  limitations under the License.
 ********************************************************************************/
 #include "actions.h"
+#include "ux.h"
 
 #include "bolos_target.h"
 #include "storage.h"

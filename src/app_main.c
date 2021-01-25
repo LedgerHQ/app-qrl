@@ -17,6 +17,7 @@
 
 #include "os_io_seproxyhal.h"
 #include "os.h"
+#include "ux.h"
 #include "apdu_codes.h"
 
 #include "view.h"
