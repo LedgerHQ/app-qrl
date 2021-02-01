@@ -15,7 +15,7 @@
 *  limitations under the License.
 ********************************************************************************/
 #include <string.h>
-#include "glyphs.h"
+#include "ux.h"
 #include "view.h"
 #include "app_main.h"
 #include "apdu_codes.h"
