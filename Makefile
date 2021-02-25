@@ -36,12 +36,12 @@ APP_LOAD_PARAMS = --appFlags 0x200 --delete $(COMMON_LOAD_PARAMS) --path "44'/23
 endif
 
 ifeq ($(TARGET_NAME),TARGET_NANOS)
-SCRIPT_LD:=$(CURDIR)/script.ld
+APP_STACK_SIZE:=2384
 ICONNAME:=$(CURDIR)/nanos_icon.gif
 endif
 
 ifeq ($(TARGET_NAME),TARGET_NANOX)
-SCRIPT_LD:=$(CURDIR)/script2.ld
+SCRIPT_LD:=$(CURDIR)/script.ld
 ICONNAME:=$(CURDIR)/nanox_icon.gif
 endif
 

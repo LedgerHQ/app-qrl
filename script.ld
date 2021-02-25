@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Blue - Secure firmware
-*   (c) 2016, 2017 Ledger
+*   (c) 2016, 2017, 2018, 2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -24,17 +24,19 @@ MEMORY
 {
   DISCARD (rwx) : ORIGIN = 0xd0000000, LENGTH = 1M
 
-  FLASH   (rx)  : ORIGIN = 0xc0d00000, LENGTH = 400K
-  SRAM    (rwx) : ORIGIN = 0x20001800, LENGTH = 4K
+  FLASH   (rx)  : ORIGIN = 0xc0de0000, LENGTH = 400K
+  DATA    (r)   : ORIGIN = 0xc0de0000, LENGTH = 400K
+  SRAM    (rwx) : ORIGIN = 0xda7a0000, LENGTH = 30K
 }
 
-PAGE_SIZE  = 64;
-STACK_SIZE = 2384;
+PAGE_SIZE  = 256;
+STACK_SIZE = 3500;
 END_STACK  = ORIGIN(SRAM) + LENGTH(SRAM);
+
+ENTRY(main)
 
 SECTIONS
 {
-  ENTRY(main)
 
   /****************************************************************/
   /* This section locates the code in FLASH                       */
@@ -46,12 +48,13 @@ SECTIONS
     /* provide start code symbol, shall be zero */
     _text = .;
     _nvram = .;
+    PROVIDE(_nvram = . + ORIGIN(FLASH));
 
     PROVIDE(_setjmp = setjmp); /*thanks clang*/
 
      /* ensure main is always @ 0xC0D00000 */
      *(.boot*)
-    
+
     /* place the other code and rodata defined BUT nvram variables that are displaced in a r/w area */
     *(.text*)
     *(.rodata)
@@ -59,28 +62,31 @@ SECTIONS
     *(.rodata.N[^_]*)
 
     . = ALIGN(4);
-    
+
     /* all code placed */
     _etext = .;
 
     . = ALIGN(PAGE_SIZE);
 
     _nvram_data = .;
-    
+
     /* NVM data (ex-filesystem) */
     *(.bss.N_* .rodata.N_*)
 
     . = ALIGN(PAGE_SIZE);
     _envram_data = .;
+    /* _nvram_data_size = _envram_data - _nvram_data; */
     _install_parameters = .;
+    PROVIDE(N_install_parameters = .);
     _envram = .;
-    
+    PROVIDE(_envram = . + ORIGIN(FLASH));
+
   } > FLASH = 0x00
 
   .data (NOLOAD):
   {
     . = ALIGN(4);
-    
+
     /**
      * Place RAM initialized variables
      */
@@ -110,9 +116,11 @@ SECTIONS
     app_stack_canary = .;
     PROVIDE(app_stack_canary = .);
     . += 4;
-    _stack = .;
-    . = _stack + STACK_SIZE;
-    PROVIDE( _stack_size = STACK_SIZE );
+    _stack_validation = .;
+    . = _stack_validation + STACK_SIZE;
+    _stack = ABSOLUTE(END_STACK) - STACK_SIZE;
+    PROVIDE( _stack = ABSOLUTE(END_STACK) - STACK_SIZE);
+    _estack = ABSOLUTE(END_STACK);
     PROVIDE( _estack = ABSOLUTE(END_STACK) );
 
   } > SRAM = 0x00
@@ -128,7 +136,7 @@ SECTIONS
     libm.a ( * )
     libgcc.a ( * )
     *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-  }
+  } > DISCARD
 
   /* Stabs debugging sections.  */
   .stab          0 : { *(.stab) }
@@ -163,5 +171,5 @@ SECTIONS
   .debug_funcnames 0 : { *(.debug_funcnames) }
   .debug_typenames 0 : { *(.debug_typenames) }
   .debug_varnames  0 : { *(.debug_varnames) }
-  
+
 }
