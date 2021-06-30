@@ -15,6 +15,7 @@
 ********************************************************************************/
 #include "actions.h"
 #include "ux.h"
+#include "os_io_seproxyhal.h"
 
 #include "bolos_target.h"
 #include "storage.h"

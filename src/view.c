@@ -16,6 +16,7 @@
 ********************************************************************************/
 #include <string.h>
 #include "ux.h"
+#include "os_io_seproxyhal.h"
 #include "view.h"
 #include "app_main.h"
 #include "apdu_codes.h"
