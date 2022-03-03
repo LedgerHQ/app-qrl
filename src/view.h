@@ -19,7 +19,7 @@
 #include "os.h"
 #include "cx.h"
 
-#if defined(TARGET_NANOX)
+#if defined(TARGET_NANOX) || defined(TARGET_NANOS2)
 #define MAX_CHARS_PER_KEY_LINE      64
 #define MAX_CHARS_PER_VALUE_LINE    256
 #define MAX_CHARS_HEXMESSAGE        100
@@ -48,7 +48,7 @@ void view_address_show();
 #define print_key(...) snprintf(viewdata.key, sizeof(viewdata.key), __VA_ARGS__);
 #define print_status(...) snprintf(viewdata.value, sizeof(viewdata.value), __VA_ARGS__);
 
-#if defined(TARGET_NANOX)
+#if defined(TARGET_NANOX) || defined(TARGET_NANOS2)
 #define CUR_FLOW G_ux.flow_stack[G_ux.stack_count-1]
 #endif
 

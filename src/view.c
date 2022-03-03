@@ -110,7 +110,7 @@ void h_sign_reject(unsigned int _) {
     io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
 }
 
-#if defined(TARGET_NANOX)
+#if defined(TARGET_NANOX) || defined(TARGET_NANOS2)
 
 #include "ux.h"
 ux_state_t G_ux;
@@ -415,7 +415,7 @@ void view_idle_show(void) {
     } else {
         UX_MENU_DISPLAY(0, menu_idle, NULL);
     }
-#elif defined(TARGET_NANOX)
+#elif defined(TARGET_NANOX) || defined(TARGET_NANOS2)
     if(G_ux.stack_count == 0) {
         ux_stack_push();
     }
@@ -436,7 +436,7 @@ void view_sign_show() {
     viewdata.idx = 0;
     view_update_review();
     view_review_show();
-#elif defined(TARGET_NANOX)
+#elif defined(TARGET_NANOX) || defined(TARGET_NANOS2)
     view_sign_internal_show();
 #endif
 }
@@ -444,7 +444,7 @@ void view_sign_show() {
 void view_sign_internal_show(void) {
 #if defined(TARGET_NANOS)
     UX_MENU_DISPLAY(0, menu_sign, NULL);
-#elif defined(TARGET_NANOX)
+#elif defined(TARGET_NANOX) || defined(TARGET_NANOS2)
     viewdata.idx = -1;
     if(G_ux.stack_count == 0) {
         ux_stack_push();
@@ -468,7 +468,7 @@ void view_setidx_show() {
 
 #if defined(TARGET_NANOS)
     UX_DISPLAY(view_setidx, view_prepro);
-#elif defined(TARGET_NANOX)
+#elif defined(TARGET_NANOX) || defined(TARGET_NANOS2)
     if(G_ux.stack_count == 0) {
         ux_stack_push();
     }
@@ -522,7 +522,7 @@ void view_address_show() {
 
 #if defined(TARGET_NANOS)
     UX_DISPLAY(view_address, view_prepro);
-#elif defined(TARGET_NANOX)
+#elif defined(TARGET_NANOX) || defined(TARGET_NANOS2)
     ux_layout_bnnn_paging_reset();
     if(G_ux.stack_count == 0) {
         ux_stack_push();

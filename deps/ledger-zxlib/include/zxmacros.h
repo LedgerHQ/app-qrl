@@ -24,7 +24,7 @@ extern "C" {
 #include "bolos_target.h"
 #endif
 
-#if defined(TARGET_NANOX)
+#if defined(TARGET_NANOX) || defined(TARGET_NANOS2)
 #define NV_CONST const
 #define NV_VOL volatile
 #else
@@ -34,13 +34,13 @@ extern "C" {
 
 #define NV_ALIGN __attribute__ ((aligned(64)))
 
-#if defined (TARGET_NANOS) || defined(TARGET_NANOX)
+#if defined (TARGET_NANOS) || defined(TARGET_NANOX) || defined(TARGET_NANOS2)
 
 #include "bolos_target.h"
 #include "os.h"
 #include "cx.h"
 
-#if defined(TARGET_NANOX)
+#if defined(TARGET_NANOX) || defined(TARGET_NANOS2)
 #include "ux.h"
 #else
 #include "os_io_seproxyhal.h"

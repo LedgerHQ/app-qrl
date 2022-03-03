@@ -103,7 +103,7 @@ void xmss_treehash(uint8_t *root_out,
 
 void xmss_randombits(NV_VOL NV_CONST uint8_t *random_bits,
                      NV_VOL const uint8_t sk_seed[48]) {
-#if defined(TARGET_NANOX)
+#if defined(TARGET_NANOX) || defined(TARGET_NANOS2)
     uint8_t buffer[3*WOTS_N];
     shake256(buffer, 3 * WOTS_N, (const uint8_t *)sk_seed, 48);
     MEMCPY_NV((void*)random_bits, buffer, 3*WOTS_N);
